@@ -11,19 +11,24 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-type Vec3 struct {
-	x, y, z float64
+type Camera2D struct {
+	w, h, x, y float64
+}
+
+type Vec2 struct {
+	x, y float64
 }
 
 type Entity struct {
-	position Vec3
+	position Vec2
+	scale    Vec2
 	image    *ebiten.Image
 }
 
 func (e *Entity) Draw(screen *ebiten.Image) {
 	opts := ebiten.DrawImageOptions{}
+	opts.GeoM.Scale(e.scale.x, e.scale.y)
 	opts.GeoM.Translate(e.position.x, e.position.y)
-
 	screen.DrawImage(
 		e.image.SubImage(
 			image.Rect(0, 0, 16, 16),
@@ -33,6 +38,7 @@ func (e *Entity) Draw(screen *ebiten.Image) {
 }
 
 type GameState struct {
+	camera   Camera2D
 	player   Entity
 	entities []Entity
 }
@@ -98,10 +104,13 @@ func main() {
 		game_state: GameState{
 			player: Entity{
 				image: playerImg,
-				position: Vec3{
+				position: Vec2{
 					x: 100.0,
 					y: 100.0,
-					z: 100.0,
+				},
+				scale: Vec2{
+					x: 2.0,
+					y: 2.0,
 				},
 			},
 		},
