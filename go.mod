@@ -1,4 +1,4 @@
-module github.com/RobHibinger/kyanite
+module kyanite
 
 go 1.22.2
 
