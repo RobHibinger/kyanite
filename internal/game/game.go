@@ -16,20 +16,19 @@ func RunGame() {
 
 	LoadResources()
 
-	g, err := NewGame()
+	game, err := NewGame()
 	if err != nil {
 		fmt.Printf("Failed to load new game: %v", err)
 		return
 	}
 
-	if err := ebiten.RunGame(&g); err != nil {
+	if err := ebiten.RunGame(&game); err != nil {
 		fmt.Printf("Failed to run game: %v", err)
 	}
 }
 
 func NewGame() (Game, error) {
 	g := Game{
-		Debug: false,
 		Camera: Camera{
 			Scale: Vec2{
 				x: 2.0,
@@ -58,7 +57,6 @@ type Camera struct {
 }
 
 type Game struct {
-	Debug                     bool
 	Count                     int
 	Camera                    Camera
 	GameState                 GameState
@@ -67,15 +65,23 @@ type Game struct {
 	ScreenWidth, ScreenHeight int
 }
 
-func (g *Game) Update() error {
-	HandleInput(g)
+func (game *Game) Update() error {
+	HandleInput(&game.InputState)
 
-	g.GameState.Player.Velocity = g.InputState.MoveDirection
-	g.GameState.Player.Position.x += g.GameState.Player.Velocity.x * g.GameState.Player.AddedSpeedMultiplier
-	g.GameState.Player.Position.y += g.GameState.Player.Velocity.y * g.GameState.Player.AddedSpeedMultiplier
-	g.Camera.Position = g.GameState.Player.Position
+	if game.InputState.IncrementSpeed {
+		game.GameState.Player.AddedSpeedMultiplier += 1
+	}
 
-	UpdateDirectionAnim(&g.GameState.Player)
+	if game.InputState.DecrementSpeed {
+		game.GameState.Player.AddedSpeedMultiplier -= 1
+	}
+
+	game.GameState.Player.Velocity = game.InputState.MoveDirection
+	game.GameState.Player.Position.x += game.GameState.Player.Velocity.x * game.GameState.Player.AddedSpeedMultiplier
+	game.GameState.Player.Position.y += game.GameState.Player.Velocity.y * game.GameState.Player.AddedSpeedMultiplier
+	game.Camera.Position = game.GameState.Player.Position
+
+	UpdateDirectionAnim(&game.GameState.Player)
 
 	return nil
 }
@@ -83,7 +89,7 @@ func (g *Game) Update() error {
 func (game *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{36, 54, 66, 0})
 
-	if game.Debug {
+	if game.InputState.Debug {
 		ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %v\nSpeed: %v", ebiten.ActualFPS(), game.GameState.Player.AddedSpeedMultiplier))
 		vector.DrawFilledCircle(screen, float32(game.ScreenWidth)/2, float32(game.ScreenHeight)/2, 5, color.Black, false)
 	}
