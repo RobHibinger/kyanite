@@ -61,7 +61,7 @@ type Game struct {
 	Camera                    Camera
 	GameState                 GameState
 	InputState                InputState
-	AnimSpriteResources       map[ResouceType]Resource
+	AnimSpriteRe              map[ResouceType]Resource
 	ScreenWidth, ScreenHeight int
 }
 
